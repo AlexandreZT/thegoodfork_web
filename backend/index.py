@@ -2,7 +2,12 @@ import pyrebase # pip install pyrebase4
 import os
 from dotenv import load_dotenv
 from routes import user, menu
+from flask import Flask, jsonify, request, abort, Response
+from flask_cors import CORS
 
+
+app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
@@ -20,78 +25,206 @@ firebaseConfig = {
 firebase=pyrebase.initialize_app(firebaseConfig)
 
 db=firebase.database()
+
 auth=firebase.auth()
+
 # storage=firebase.storage()
 
 
-## Anthentification ##
-# email = "alexzt@hotmail.fr"
-# password = "mypassword"
 
-# auth.sign_in_with_email_and_password(email, password)
+@app.route('/', methods=['GET'])
+def home():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return Response(status=200)
 
-# email = "alexzt2@hotmail.fr"
-# password = "mypassword2"
+@app.route('/users', methods=['GET'])
+def get_all_users_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    
+    return jsonify(user.get_all_users_data(db))
 
-# auth.create_user_with_email_and_password(email, password)
+@app.route('/menu', methods=['GET'])
+def get_menu_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(menu.get_menu_data(db))
 
-# use generated id
-# db.child("user").push(user)
+@app.route('/user/<id>', methods=['GET'])
+def get_user_data_with_id(id):
+    if request.method != 'GET': 
+        return Response(status=404)
 
-# set my own id
+    return jsonify(user.get_user_data_with_id(db, id))
 
-# db.child("user").child("myid").set(user)
+@app.route('/menu/<id>', methods=['GET'])
+def get_menu_item_data_with_id(id):
+    if request.method != 'GET': 
+        return Response(status=404)
 
-# # # # # # MANAGEMENT # # # # # # #
+    return jsonify(menu.get_menu_item_data_with_id(db, id))
 
-# user.create_user(db, input("firstname : "), input("lastname : "), input("email : "), input("phone : "), input("password : "), input("type : "))
+@app.route('/owners', methods=['GET'])
+def get_all_owners_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(user.get_all_owners_data(db))
 
-# print(user.get_user_data_with_id(db, input("id : "))
+@app.route('/customers', methods=['GET'])
+def get_all_customers_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(user.get_all_customers_data(db))    
 
-# print(user.get_all_users_data(db))
+@app.route('/waiters', methods=['GET'])
+def get_all_waiters_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(user.get_all_waiters_data(db))
 
-# print(user.get_all_waiters_data(db))
+@app.route('/cooks', methods=['GET'])
+def get_all_cooks_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(user.get_all_cooks_data(db))    
 
-# print(user.get_all_customers_data(db))
+@app.route('/barmen', methods=['GET'])
+def get_all_barmen_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(user.get_all_barmen_data(db))   
 
-# print(user.get_all_cooks_data(db))
+@app.route('/foods', methods=['GET'])
+def get_all_foods_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(menu.get_all_foods_data(db)) 
 
-# print(user.get_all_owners_data(db))
+@app.route('/drinks', methods=['GET'])
+def get_all_drinks_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+    return jsonify(menu.get_all_drinks_data(db)) 
 
-# print(user.get_all_barmen_data(db))
+@app.route('/create-user', methods=['POST'])
+def create_user():
+    if request.method != 'POST': 
+        return Response(status=404)
 
-# menu.create_menu_item(db, "vodka", "encore une", 30, "drink")
+    # TODO : switch request.json[] to request.form.get() ?
 
-# menu.create_menu_item(db, "twix", "ne se partage pas", 2, "food")
+    firstname = request.json["firstname"]
+    lastname = request.json["lastname"]
+    email = request.json["email"]
+    phone = request.json["phone"]
+    password = request.json["password"]
+    type = request.json["type"]
 
-# print(menu.get_all_drinks_data(db))
+    user.create_user(db, firstname, lastname, email, phone, password, type)
+    auth.create_user_with_email_and_password(email, password)
 
-# print(menu.get_all_foods_data(db))
+    return Response(status=200)
 
-# print(menu.get_menu_data(db))
+@app.route('/sign-in', methods=['POST'])
+def sign_in():
+    if request.method != 'POST': 
+        return Response(status=404)
 
-# print(menu.get_menu_item_data_with_id(db, input("menu item id : ")))
+    # TODO : switch request.json[] to request.form.get() ?
 
-# menu.delete_menu_item_with_id(db, input("menu item id : "))
+    email = request.json["email"]
+    password = request.json["password"]
 
-# user.delete_user_with_id(db, input("user id : "))
+    auth.sign_in_with_email_and_password(email, password)
 
-menu.update_menu_item_data_with_id(
-    db=db, 
-    id=input("menu item id : "), 
-    name=input("name  : "),
-    description=input("description : "),
-    price=input("price : "),
-    type=input("type : "),
-)
+    return Response(status=200)
 
-# user.update_user_data_from_id(
-#     db=db, 
-#     id=input("user id : "), 
-#     firstname=input("firstname : "),
-#     lastname=input("lastname : "), 
-#     email=input("email : "),
-#     phone=input("phone : "), 
-#     password=input("password : "),
-#     type=input("type : ")
-# )
+@app.route('/create-menu-item', methods=['POST'])
+def create_menu_item():
+    if request.method != 'POST': 
+        return Response(status=404)
+
+    # TODO : switch request.json[] to request.form.get() ?
+
+    name = request.json["name"]
+    description = request.json["description"]
+    price = request.json["price"]
+    type = request.json["type"]
+
+    menu.create_menu_item(db, name, description, price, type)
+
+    return Response(status=200)
+ 
+@app.route('/delete-user-with-id', methods=['DELETE'])
+def delete_user_with_id():
+    if request.method != 'DELETE': 
+        return Response(status=404)
+
+    # TODO : switch request.json[] to request.form.get() ?
+
+    id = request.json["id"]
+
+    user.delete_user_with_id(db, id)
+
+    return Response(status=200)
+
+@app.route('/delete-menu-item-with-id', methods=['DELETE'])
+def delete_menu_item_with_id():
+    if request.method != 'DELETE': 
+        return Response(status=404)
+
+    # TODO : switch request.json[] to request.form.get() ?
+
+    id = request.json["id"]
+
+    menu.delete_menu_item_with_id(db, id)
+
+    return Response(status=200)
+
+@app.route('/update-menu-item-data-with-id', methods=['PUT'])
+def update_menu_item_data_with_id():
+    if request.method != 'PUT': 
+        return Response(status=404)
+
+    # TODO : switch request.json[] to request.form.get() ?
+
+    id = request.json["id"]
+    name = request.json["name"]
+    description = request.json["description"]
+    price = request.json["price"]
+    type = request.json["type"]
+
+    menu.update_menu_item_data_with_id(db, id, name, description, price, type)
+
+    return Response(status=200)
+
+@app.route('/update-user-data-with-id', methods=['PUT'])
+def update_user_data_with_id():
+    if request.method != 'PUT': 
+        return Response(status=404)
+
+    # TODO : switch request.json[] to request.form.get() ?
+
+    id = request.json["id"]
+    firstname = request.json["firstname"]
+    lastname = request.json["lastname"]
+    email = request.json["email"]
+    phone = request.json["phone"]
+    password = request.json["password"]
+    type = request.json["type"]
+
+    user.update_user_data_with_id(db, id, firstname, lastname, email, phone, password, type)
+
+    return Response(status=200)
+    
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# # NOTES # #
+# set my own id :  db.child("user").child("myid").set(user)
+
+# login = auth.sign_in_with_email_and_password(email, password)
+# auth.send_email_verification(login['idToken'])
+
+# auth.send_password_reset_email(email)

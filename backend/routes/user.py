@@ -25,7 +25,7 @@ def get_all_users_data(db):
 def get_user_data_with_id(db, id):
     return db.child("user").child(id).get().val()
 
-def update_user_data_from_id(db, id, firstname, lastname, email, phone, password, type):    
+def update_user_data_with_id(db, id, firstname, lastname, email, phone, password, type):    
     types = ["owner", "customer", "cook", "waiter", "barman"]
 
     data = db.child("user").child(id).get().val()
@@ -113,6 +113,7 @@ def get_all_barmen_data(db):
     return data    
 
 def delete_user_with_id(db, id):
+    # TODO : est-ce que l'utilisateur exsite ?
     db.child("user").child(id).remove()
 
 
