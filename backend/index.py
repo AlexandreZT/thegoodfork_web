@@ -3,11 +3,14 @@ import os
 from dotenv import load_dotenv
 from routes import user, menu
 from flask import Flask, jsonify, request, abort, Response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+import json
 
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app) # resources={r"/api/*": {"origins": "*"}}
+
+# CORS(app, support_credentials=True)
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
@@ -28,9 +31,7 @@ db=firebase.database()
 
 auth=firebase.auth()
 
-# storage=firebase.storage()
-
-
+storage=firebase.storage()
 
 @app.route('/', methods=['GET'])
 def home():
@@ -39,10 +40,10 @@ def home():
     return Response(status=200)
 
 @app.route('/users', methods=['GET'])
+# @cross_origin(supports_credentials=True)
 def get_all_users_data():
     if request.method != 'GET': 
-        return Response(status=404)
-    
+        return Response(status=404)    
     return jsonify(user.get_all_users_data(db))
 
 @app.route('/menu', methods=['GET'])
@@ -55,14 +56,12 @@ def get_menu_data():
 def get_user_data_with_id(id):
     if request.method != 'GET': 
         return Response(status=404)
-
     return jsonify(user.get_user_data_with_id(db, id))
 
 @app.route('/menu/<id>', methods=['GET'])
 def get_menu_item_data_with_id(id):
     if request.method != 'GET': 
         return Response(status=404)
-
     return jsonify(menu.get_menu_item_data_with_id(db, id))
 
 @app.route('/owners', methods=['GET'])
@@ -217,9 +216,22 @@ def update_user_data_with_id():
     user.update_user_data_with_id(db, id, firstname, lastname, email, phone, password, type)
 
     return Response(status=200)
+
+@app.route('/data', methods=['GET'])
+def get_all_data():
+    if request.method != 'GET': 
+        return Response(status=404)
+
+    full_data = db.get().val()
+    with open('backup.json', 'w') as json_file:
+        json.dump(full_data, json_file)
+
+    storage.child("backup").put("backup.json")
+
+    return jsonify(full_data) 
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
 
 # # NOTES # #
 # set my own id :  db.child("user").child("myid").set(user)
