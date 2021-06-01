@@ -20,21 +20,21 @@ def get_menu_item_data_with_id(db, id):
 
 def get_all_drinks_data(db):
     menu = db.child("menu").get()
-    drinks=[]
+    drinks={}
 
     for item in menu.each():
         if item.val()['type'] == "drink":
-            drinks.append(item.val())
+            drinks.update({item.key() : item.val()})
 
     return drinks
 
 def get_all_foods_data(db):
     menu = db.child("menu").get()
-    foods=[]
+    foods={}
 
     for item in menu.each():
         if item.val()['type'] == "food":
-            foods.append(item.val())
+            foods.update({item.key() : item.val()})
 
     return foods
 

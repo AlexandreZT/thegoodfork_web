@@ -11,22 +11,29 @@ export default class SignIn extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault()
-
-        fetch('http://localhost:5000/sign-in', {
-            method: 'POST',
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({
-                username : e.target[0].value,
-                password : e.target[1].value
-            }),
-        }).then(response => {
-            if (response === 200) {
-                this.props.history.push("/");
-                return
-            }
-        }) // .catch(err => console.log(err)); 
+        if (e.target[0].value === "" ||  // email format already checked
+            e.target[1].value === "" || e.target[4].value.length < 8) { // len 8 mini
+            alert(`
+            Email must be in valid format
+            Password lengh 8+
+            `)
+        } else {
+            fetch('http://localhost:5000/sign-in', {
+                method: 'POST',
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({
+                    username : e.target[0].value,
+                    password : e.target[1].value
+                }),
+            }).then(response => {
+                if (response === 200) {
+                    this.props.history.push("/");
+                    return
+                }
+            }) // .catch(err => console.log(err)); 
+        }
     }
 
     render() {
@@ -36,8 +43,8 @@ export default class SignIn extends Component {
                     <form onSubmit={this.handleSubmit}>
                         <h3>Sign In</h3>
                         <div className="form-group">
-                            <label>Username</label><br/>
-                            <input type="text" className="form-control" placeholder="Enter username"/>
+                            <label>Email</label><br/>
+                            <input type="email" className="form-control" placeholder="Enter email"/>
                         </div>
                         <br/>
                         <div className="form-group">

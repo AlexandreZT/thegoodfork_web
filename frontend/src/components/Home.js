@@ -13,13 +13,16 @@ export default class Home extends Component {
   switchDataOnDashboard = this.switchDataOnDashboard.bind(this);
   selectMenuDataForDashboard = this.selectMenuDataForDashboard.bind(this);
   selectUsersDataForDashboard = this.selectUsersDataForDashboard.bind(this);
+  // selectId = this.getId.bind(this);
 
-
+  getId (id) {
+    console.log(id)
+  }
   getUsersData() {
     if (this.state.users_data) {       
         return Object.keys(this.state.users_data).map( (id) => { // pour tout les id
           return <tr>
-            <td>{id}</td>
+            <td onClick={this.getId(id)}>{id}</td>
             <td>{this.state.users_data[id]["email"]}</td>
             <td>{this.state.users_data[id]["firstname"]}</td>
             <td>{this.state.users_data[id]["lastname"]}</td>
@@ -85,7 +88,7 @@ export default class Home extends Component {
       console.log(error);
     });    
     
-    var config = {
+    config = {
       method: 'get',
       url: 'http://localhost:5000/menu'
     };
@@ -100,7 +103,6 @@ export default class Home extends Component {
   } 
 
   selectMenuDataForDashboard() {
-    console.log("selectMenuDataForDashboard")
     this.setState({
       displayed_data: "menu"
     })
@@ -108,7 +110,6 @@ export default class Home extends Component {
   
 
   selectUsersDataForDashboard() {
-    console.log("selectUsersDataForDashboard")
     this.setState({
       displayed_data: "users"
     })

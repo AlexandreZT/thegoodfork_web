@@ -1,7 +1,7 @@
 import pyrebase # pip install pyrebase4
 import os
 from dotenv import load_dotenv
-from routes import user, menu
+from routes import user, menu, table, booking
 from flask import Flask, jsonify, request, abort, Response
 from flask_cors import CORS, cross_origin
 import json
@@ -118,10 +118,10 @@ def create_user():
     email = request.json["email"]
     phone = request.json["phone"]
     password = request.json["password"]
-    type = request.json["type"]
+    # type = request.json["type"]
 
-    user.create_user(db, firstname, lastname, email, phone, password, type)
-    auth.create_user_with_email_and_password(email, password)
+    user.create_user(db, firstname, lastname, email, phone, password)
+    # auth.create_user_with_email_and_password(email, password)
 
     return Response(status=200)
 
@@ -134,8 +134,10 @@ def sign_in():
 
     email = request.json["email"]
     password = request.json["password"]
+    
+    user.sign_in(db, email, password)
 
-    auth.sign_in_with_email_and_password(email, password)
+    # auth.sign_in_with_email_and_password(email, password)
 
     return Response(status=200)
 
@@ -229,7 +231,17 @@ def get_all_data():
     storage.child("backup").put("backup.json")
 
     return jsonify(full_data) 
-    
+
+@app.route('/tables', methods=['GET'])
+def get_tables():
+    if (True):
+        return jsonify(table.get_tables(db))
+
+@app.route('/booking', methods=['GET'])
+def get_booking_order():
+    if (True):
+        return jsonify(booking.get_booking_order(db))
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
